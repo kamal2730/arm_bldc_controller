@@ -36,7 +36,7 @@
   <ros2_control name="ArmBLDCSystem" type="system">
     <hardware>
       <plugin>arm_bldc_controller/ArmBLDCSystem</plugin>
-      <param name="device">/dev/ttyACM0</param>
+      <param name="device">/dev/nlink</param>
     </hardware>
 
     <joint name="joint1">
