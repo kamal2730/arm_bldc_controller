@@ -1,7 +1,7 @@
 #include "arm_bldc_controller/arm_bldc_system.hpp"
 
 #include <pluginlib/class_list_macros.hpp>
-#include <rclcpp/rclcpp.hpp>
+
 #include <cmath>
 
 namespace arm_bldc_controller
@@ -37,6 +37,20 @@ ArmBLDCSystem::on_init(const hardware_interface::HardwareInfo & info)
     node_ids_.push_back(node_id);
     actuators_.push_back(new Actuator(node_id, iface_));
   }
+  
+  node_ = std::make_shared<rclcpp::Node>("arm_bldc_telemetry");
+  current_pub_ = node_->create_publisher<std_msgs::msg::Float32MultiArray>("motor_currents", 10);
+
+  for (size_t i = 0; i < actuators_.size(); ++i) {
+    float p, v, t;
+    actuators_[i]->getOutputPosition(&p);
+    actuators_[i]->getOutputVelocity(&v);
+    actuators_[i]->getOutputTorque(&t);
+
+    pos_[i] = p ;
+    vel_[i] = v;
+    eff_[i] = t;
+  }
 
   return CallbackReturn::SUCCESS;
 }
@@ -45,7 +59,7 @@ hardware_interface::CallbackReturn
 ArmBLDCSystem::on_activate(const rclcpp_lifecycle::State &)
 {
   for (auto *act : actuators_) {
-    act->clearActuatorErrors();
+    // act->clearActuatorErrors();
     act->setDeviceToActive();
   }
   return CallbackReturn::SUCCESS;
@@ -99,16 +113,26 @@ ArmBLDCSystem::export_command_interfaces()
 hardware_interface::return_type
 ArmBLDCSystem::read(const rclcpp::Time &, const rclcpp::Duration &)
 {
+  auto message = std_msgs::msg::Float32MultiArray();
   for (size_t i = 0; i < actuators_.size(); ++i) {
-    float p, v, t;
+    float p, v, t,id, iq;
     actuators_[i]->getOutputPosition(&p);
     actuators_[i]->getOutputVelocity(&v);
     actuators_[i]->getOutputTorque(&t);
+    actuators_[i]->getIdqCurrents(&id, &iq);
 
-    pos_[i] = p * M_PI / 180.0;
-    vel_[i] = v * M_PI / 180.0;
+    uint32_t errorCode;
+    actuators_[i]->getErrorCode(&errorCode);
+
+    if(0<errorCode && errorCode<=256) RCLCPP_WARN(rclcpp::get_logger("ArmBLDCSystem"), "Motor no:%i CODE :%i", i, errorCode);
+
+    pos_[i] = p ;
+    vel_[i] = v ;
     eff_[i] = t;
+    message.data.push_back(id);
+    message.data.push_back(iq);
   }
+  current_pub_->publish(message);
   return hardware_interface::return_type::OK;
 }
 
@@ -117,8 +141,8 @@ ArmBLDCSystem::write(const rclcpp::Time &, const rclcpp::Duration &)
 {
   for (size_t i = 0; i < actuators_.size(); ++i) {
     actuators_[i]->setPositionControl(
-      static_cast<float>(cmd_pos_[i] * 180.0 / M_PI),
-      90.0f
+      static_cast<float>(cmd_pos_[i]),
+      40.0f
     );
   }
   return hardware_interface::return_type::OK;

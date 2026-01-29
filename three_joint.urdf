@@ -36,7 +36,7 @@
   <ros2_control name="ArmBLDCSystem" type="system">
     <hardware>
       <plugin>arm_bldc_controller/ArmBLDCSystem</plugin>
-      <param name="device">/dev/nlink</param>
+      <param name="device">/dev/ttyACM0</param>
     </hardware>
 
     <joint name="joint1">
@@ -48,7 +48,7 @@
     </joint>
 
     <joint name="joint2">
-      <param name="node_id">1</param>
+      <param name="node_id">2</param>
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
@@ -56,7 +56,7 @@
     </joint>
 
     <joint name="joint3">
-      <param name="node_id">2</param>
+      <param name="node_id">1</param>
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>

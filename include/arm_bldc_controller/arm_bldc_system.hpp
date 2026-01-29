@@ -5,6 +5,11 @@
 #include <rclcpp_lifecycle/state.hpp>
 #include <rclcpp/macros.hpp>
 
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/publisher.hpp>
+#include <std_msgs/msg/float32_multi_array.hpp>
+
 #include "nmotion_transport/actuator.hpp"
 #include "nmotion_transport/interface.hpp"
 #include "nmotion_transport/usb_interface.hpp"
@@ -44,6 +49,8 @@ public:
 
 private:
   Interface *iface_{nullptr};
+  std::shared_ptr<rclcpp::Node> node_;
+  rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr current_pub_;
 
   std::vector<Actuator*> actuators_;
   std::vector<uint32_t> node_ids_;
