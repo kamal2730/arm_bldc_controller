@@ -4,13 +4,7 @@ ros2 run controller_manager ros2_control_node   --ros-args   -p robot_descriptio
 
 ros2 run robot_state_publisher robot_state_publisher   --ros-args -p robot_description:="$(cat ~/arm_ws/src/arm_bldc_controller/three_joint.urdf)"
 
-ros2 topic pub -1   /joint_trajectory_controller/joint_trajectory   trajectory_msgs/msg/JointTrajectory   "{
-    joint_names: ['joint1', 'joint2', 'joint3'],
-    points: [{
-      positions: [1.0, 0.5, -0.5],
-      time_from_start: {sec: 2}
-    }]
-  }"
+ 
 
 ros2 run controller_manager spawner joint_trajectory_controller   --param-file ~/arm_ws/src/arm_bldc_controller/config/joint_trajectory_controller.yaml
 

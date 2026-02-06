@@ -115,11 +115,12 @@ ArmBLDCSystem::read(const rclcpp::Time &, const rclcpp::Duration &)
 {
   auto message = std_msgs::msg::Float32MultiArray();
   for (size_t i = 0; i < actuators_.size(); ++i) {
-    float p, v, t,id, iq;
+    float p, v, t,id, iq,temperature;
     actuators_[i]->getOutputPosition(&p);
     actuators_[i]->getOutputVelocity(&v);
     actuators_[i]->getOutputTorque(&t);
     actuators_[i]->getIdqCurrents(&id, &iq);
+    actuators_[i]->getDriverTemperatur(&temperature);
 
     uint32_t errorCode;
     actuators_[i]->getErrorCode(&errorCode);
@@ -131,6 +132,7 @@ ArmBLDCSystem::read(const rclcpp::Time &, const rclcpp::Duration &)
     eff_[i] = t;
     message.data.push_back(id);
     message.data.push_back(iq);
+    message.data.push_back(temperature);
   }
   current_pub_->publish(message);
   return hardware_interface::return_type::OK;
