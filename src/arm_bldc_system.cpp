@@ -120,7 +120,7 @@ ArmBLDCSystem::read(const rclcpp::Time &, const rclcpp::Duration &)
     actuators_[i]->getOutputVelocity(&v);
     actuators_[i]->getOutputTorque(&t);
     actuators_[i]->getIdqCurrents(&id, &iq);
-    actuators_[i]->getDriverTemperatur(&temperature);
+    actuators_[i]->getDriverTemperature(&temperature);
 
     uint32_t errorCode;
     actuators_[i]->getErrorCode(&errorCode);
