@@ -47,8 +47,8 @@ ArmBLDCSystem::on_init(const hardware_interface::HardwareInfo & info)
     actuators_[i]->getOutputVelocity(&v);
     actuators_[i]->getOutputTorque(&t);
 
-    pos_[i] = p ;
-    vel_[i] = v;
+    pos_[i] = p * DEG2RAD;
+    vel_[i] = v * DEG2RAD;
     eff_[i] = t;
   }
 
@@ -127,8 +127,8 @@ ArmBLDCSystem::read(const rclcpp::Time &, const rclcpp::Duration &)
 
     if(0<errorCode && errorCode<=256) RCLCPP_WARN(rclcpp::get_logger("ArmBLDCSystem"), "Motor no:%i CODE :%i", i, errorCode);
 
-    pos_[i] = p ;
-    vel_[i] = v ;
+    pos_[i] = p * DEG2RAD;
+    vel_[i] = v * DEG2RAD;
     eff_[i] = t;
     message.data.push_back(id);
     message.data.push_back(iq);
@@ -143,7 +143,7 @@ ArmBLDCSystem::write(const rclcpp::Time &, const rclcpp::Duration &)
 {
   for (size_t i = 0; i < actuators_.size(); ++i) {
     actuators_[i]->setPositionControl(
-      static_cast<float>(cmd_pos_[i]),
+      static_cast<float>(cmd_pos_[i] * RAD2DEG),
       40.0f
     );
   }
